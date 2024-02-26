@@ -2,16 +2,16 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 
-router.get("/", async (req, res) => {
-  try {
-    const users = await User.find();
-    res.json(users);
-  } catch (err) {
-    res.json({ message: err });
-  }
-});
+// controller functions
+const { signupUser, loginUser } = require("../controllers/userController");
 
-router.post("/", async (req, res) => {
+// login route
+router.post("/login", loginUser);
+
+// signup route
+router.post("/signup", signupUser )
+
+/* router.post("/signup", async (req, res) => {
   const user = new User({
     name: req.body.name,
     email: req.body.email,
@@ -25,6 +25,6 @@ router.post("/", async (req, res) => {
   } catch (err) {
     res.json({ error: err });
   }
-});
+}); */
 
 module.exports = router;

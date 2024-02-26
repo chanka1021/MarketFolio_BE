@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 1937;
+const PORT = process.env.PORT || 2005;
 const mongoose = require('mongoose');
 require('dotenv').config()
 
@@ -15,7 +15,7 @@ mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true, useUnifiedTo
 
 //import routes
 const userRoutes = require('./routes/users');
-app.use('/users',userRoutes)
+app.use('/user',userRoutes)
 
 //middleware
 
