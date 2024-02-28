@@ -1,10 +1,26 @@
 const User = require("../models/User");
+const jwt = require("jsonwebtoken");
+
+//create token FUNCTION
+const createToken = (_id) => {
+  return jwt.sign({ _id }, process.env.SECRET, { expiresIn: "3d" });
+}
+
+
 
 // login user
 const loginUser = async (req, res) => {
-  res.json({ msg: "login user" });
-};
+  try{
+    const user = await User.loginUser(req.body);
+    var token = createToken(user._id);
+    res.header("auth-token", token).send({ auth: true, token: token });
+  }
+  catch(err){
+    res.status(400).json({ error: err.message });
+  }
 
+ 
+};
 //// signup user
 const signupUser = async (req, res) => {
   try {
@@ -16,8 +32,12 @@ const signupUser = async (req, res) => {
       phone: req.body.phone,
     };
     const savedUser = await User.createUser(userData);
-
-    res.status(200).json(savedUser.email);
+    //return json web token with the id of the user created
+    const token = createToken(savedUser._id);
+    res.status(201).send({
+      user: savedUser,
+      token: token,
+    })
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
