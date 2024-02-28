@@ -11,6 +11,11 @@ router.post("/login", loginUser);
 // signup route
 router.post("/signup", signupUser )
 
+router.get("/test", async (req, res) => {
+
+  res.json({ msg: "users route" });
+})
+
 /* router.post("/signup", async (req, res) => {
   const user = new User({
     name: req.body.name,
