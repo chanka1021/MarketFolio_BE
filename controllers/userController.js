@@ -13,7 +13,13 @@ const loginUser = async (req, res) => {
   try{
     const user = await User.loginUser(req.body);
     var token = createToken(user._id);
-    res.header("auth-token", token).send({ auth: true, token: token });
+    res.header("auth-token", token).send({ 
+      id : user._id,
+      name : user.name,
+      email: user.email,
+      city: user.city,
+      phone: user.phone,
+      auth: true, token: token });
   }
   catch(err){
     res.status(400).json({ error: err.message });
@@ -35,7 +41,11 @@ const signupUser = async (req, res) => {
     //return json web token with the id of the user created
     const token = createToken(savedUser._id);
     res.status(201).send({
-      user: savedUser,
+      email: savedUser.email,
+      name: savedUser.name,
+      city: savedUser.city,
+      phone: savedUser.phone,
+      id : savedUser._id,
       token: token,
     })
   } catch (err) {
