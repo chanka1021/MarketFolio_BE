@@ -53,8 +53,21 @@ const signupUser = async (req, res) => {
   }
 };
 
-
+//update user 
+const UpdateUser = async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!user) {
+      return res.status(404).json({ error: 'No user found with this ID' });
+    }
+    res.status(200).json(user);
+  }
+  catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
 module.exports = {
   loginUser,
   signupUser,
+  UpdateUser
 };
