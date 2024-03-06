@@ -17,6 +17,9 @@ mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true, useUnifiedTo
     console.log('database connected');
 });
 
+app.get('/', (req, res) => {
+    res.send('Hello');
+});
 
 //import routes
 const userRoutes = require('./routes/users');
