@@ -54,9 +54,9 @@ const signupUser = async (req, res) => {
 };
 
 //update user 
-const UpdateUser = async (req, res) => {
+const updateUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const user = await User.updateUser(req.params.id, req.body);
     if (!user) {
       return res.status(404).json({ error: 'No user found with this ID' });
     }
@@ -66,8 +66,9 @@ const UpdateUser = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 }
+
 module.exports = {
   loginUser,
   signupUser,
-  UpdateUser
+  updateUser
 };

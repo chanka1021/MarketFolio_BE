@@ -12,24 +12,71 @@ const UserSchema = mongoose.Schema({
 
 //static method to create User
 UserSchema.statics.createUser = async function (userData) {
-
   //validation
-  if(!userData.email || !userData.password) { throw new Error("All fields are required"); }
-  if (!validator.isAscii(userData.name)) { throw new Error("Name is not valid"); }
-  if (!validator.isEmail(userData.email)) { throw new Error("Invalid Email"); }
+  if (!userData.email || !userData.password) {
+    throw new Error("All fields are required");
+  }
+  if (!validator.isAscii(userData.name)) {
+    throw new Error("Name is not valid");
+  }
+  if (!validator.isEmail(userData.email)) {
+    throw new Error("Invalid Email");
+  }
   const exists = await this.findOne({ email: userData.email });
-  if (exists) { throw new Error("User already exists"); }
+  if (exists) {
+    throw new Error("User already exists");
+  }
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(userData.password, salt);
   return this.create({ ...userData, password: hashedPassword });
 };
 //static method to login User
 UserSchema.statics.loginUser = async function (userData) {
-  if(!userData.email || !userData.password) { throw new Error("All fields must be filled"); }
+  if (!userData.email || !userData.password) {
+    throw new Error("All fields must be filled");
+  }
   const user = await this.findOne({ email: userData.email });
-  if (!user) { throw new Error("Incorrect email"); }
+  if (!user) {
+    throw new Error("Incorrect email");
+  }
   const match = await bcrypt.compare(userData.password, user.password);
-  if (!match) { throw new Error("Incorrect password"); }
+  if (!match) {
+    throw new Error("Incorrect password");
+  }
   return user;
 };
+// method to update User
+UserSchema.statics.updateUser = async function(userId, userData) {
+  // Validation
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+  if (!userData) {
+    throw new Error("User data is required");
+  }
+  if (userData.password) {
+    if (!userData.passwordOLD) {
+      throw new Error("Old password is required to update the password");
+    }
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const match = await bcrypt.compare(userData.passwordOLD, user.password);
+    if (!match) {
+      throw new Error("Incorrect password");
+    }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(userData.password, salt);
+    userData.password = hashedPassword;
+    delete userData.passwordOLD;
+  }
+  // Update user data
+  const updatedUser = await this.findByIdAndUpdate(userId, userData, { new: true });
+  if (!updatedUser) {
+    throw new Error("Failed to update user data");
+  }
+  return updatedUser;
+};
+
 module.exports = mongoose.model("User", UserSchema);
