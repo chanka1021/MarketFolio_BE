@@ -25,6 +25,9 @@ app.get('/', (req, res) => {
 const userRoutes = require('./routes/users');
 app.use('/user',userRoutes)
 
+const listingRoutes = require('./routes/listings');
+app.use('/listing',listingRoutes)
+
 //middleware
 
 
