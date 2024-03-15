@@ -29,6 +29,7 @@ const listingRoutes = require('./routes/listings');
 app.use('/listing',listingRoutes)
 
 //middleware
+app.use(express.static('public'));
 
 
 app.listen(PORT, () => {
