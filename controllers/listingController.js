@@ -127,6 +127,15 @@ const getFilteredListing = async (req, res) => {
   }
 };
 
+// get listings by userid 
+const getListingByUserId = async (req, res) => {
+  try {
+    const listings = await Listing.find({ seller: req.params.id });
+    res.send(listings);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 module.exports = {
   createListing,
