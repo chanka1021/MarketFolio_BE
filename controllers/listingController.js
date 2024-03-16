@@ -141,5 +141,6 @@ module.exports = {
   createListing,
   getAllListings,
   getOneListing,
-  getFilteredListing
+  getFilteredListing,
+  getListingByUserId
 };

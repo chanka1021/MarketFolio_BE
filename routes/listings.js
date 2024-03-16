@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 // controller functions
-const { createListing, getAllListings ,getOneListing,getFilteredListing } = require("../controllers/listingController");
+const { createListing, getAllListings ,getOneListing,getFilteredListing ,getListingByUserId} = require("../controllers/listingController");
 
 
 // get all listings route
