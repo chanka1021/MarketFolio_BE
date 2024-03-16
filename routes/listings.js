@@ -13,4 +13,6 @@ router.post("/create", createListing);
 router.get("/one/:id", getOneListing);
 // get listing with category/city/price filter
 router.get('/filter', getFilteredListing)
+// get listings by userid
+router.get('/user/:id', getListingByUserId)
 module.exports = router;
