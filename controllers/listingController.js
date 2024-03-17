@@ -1,17 +1,36 @@
 const Listing = require("../models/Listing");
 const multer = require("multer");
 const User = require('../models/User');
+require('dotenv').config()
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const { S3Client, GetObjectCommand , PutObjectCommand } = require("@aws-sdk/client-s3");
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/images');
+
+const BUCKET_NAME = process.env.BUCKET_NAME
+const BUCKET_REGION = process.env.BUCKET_REGION
+const ACCESS_KEY = process.env.ACCESS_KEY
+const SECRET_ACCESS_KEY = process.env.SECRET_ACCESS_KEY
+
+const s3 = new S3Client({
+  credentials: {
+    accessKeyId: ACCESS_KEY,
+    secretAccessKey: SECRET_ACCESS_KEY
   },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
+  region: BUCKET_REGION
 });
 
-const upload = multer({ storage: storage }).array('photos', 5); // Change to array()
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage }).array('photos',5);
+ 
+const randomImageName = () => {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < 10; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}
 
 const createListing = async (req, res) => {
   try {
@@ -22,6 +41,14 @@ const createListing = async (req, res) => {
       } else if (err) {
         return res.status(400).json({ error: "Error uploading files: " + err.message });
       }
+      const ImageName = randomImageName()
+      const command = new PutObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key:   ImageName,
+        Body: req.files[0].buffer,
+        ContentType: req.files[0].mimetype
+      });
+      await s3.send(command);
 
       // Files uploaded successfully, proceed with creating the listing
       const listingData = {
@@ -32,15 +59,8 @@ const createListing = async (req, res) => {
         city: req.body.city,
         seller: req.body.seller,
         address: req.body.address,
-        createdAt: Date.now(),
+        photos:  ImageName
       };
-
-      if (req.files && req.files.length > 0) {
-        listingData.photos = req.files.map(file => file.path); // Use req.files to access uploaded files
-      } else {
-        listingData.photos = []; // Set images to an empty array if no images were uploaded
-      }
-
       const listing = await Listing.create(listingData);
       res.send(listing);
     });
@@ -120,7 +140,19 @@ const getFilteredListing = async (req, res) => {
 
     // If there are filters, use them; otherwise, retrieve all listings
     const listings = hasFilters ? await Listing.find(filter) : await Listing.find();
-    
+
+    for (const listing of listings) {
+      const getObjParams = {
+        Bucket: BUCKET_NAME,
+        Key: listing.photos[0].filepath,
+      };
+      const command = new GetObjectCommand(getObjParams);
+      const url = await getSignedUrl(s3, command);
+      if (url) {
+        listing.photos[0] = url;
+      }
+    }
+
     res.send(listings);
   } catch (err) {
     res.status(500).json({ error: err.message });
