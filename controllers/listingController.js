@@ -209,9 +209,22 @@ const getListingByUserId = async (req, res) => {
 };
 
 // Controller function to delete a listing
+// Controller function to delete a listing
 const deleteListing = async (req, res) => {
   try {
-    const listing = await Listing.findByIdAndDelete(req.params.id); // Find and delete the listing by ID
+    const listing = await Listing.findById(req.params.id); // Find the listing by ID
+    if (!listing) {
+      return res.status(404).json({ error: "Listing not found" }); // If listing not found, return 404
+    }
+
+    // Check if the user is authorized to delete the listing
+    if (listing.seller.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Unauthorized: You are not the owner of this listing" });
+    }
+
+    // Delete the listing from the database
+    await listing.remove();
+
     // Delete associated images from S3
     const images = listing.photos;
     for (const image of images) {
@@ -222,23 +235,31 @@ const deleteListing = async (req, res) => {
       const command = new DeleteObjectCommand(deleteParams);
       await s3.send(command);
     }
-    if (!listing) {
-      return res.status(404).json({ error: "Listing not found" }); // If listing not found, return 404
-    }
+
     res.send(listing); // Send the deleted listing
   } catch (err) {
     res.status(500).json({ error: err.message }); // Handle errors
   }
 };
 
+
 // Controller function to update a listing
 const updateListing = async (req, res) => {
   try {
-    const listing = await Listing.findByIdAndUpdate(req.params.id, req.body, { new: true }); // Find and update the listing by ID
+    const listing = await Listing.findById(req.params.id); // Find the listing by ID
     if (!listing) {
       return res.status(404).json({ error: "Listing not found" }); // If listing not found, return 404
     }
-    res.send(listing); // Send the updated listing
+
+    // Check if the user is authorized to update the listing
+    if (listing.seller.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Unauthorized: You are not the owner of this listing" });
+    }
+
+    // Update the listing in the database
+    const updatedListing = await Listing.findByIdAndUpdate(req.params.id, req.body, { new: true });
+
+    res.send(updatedListing); // Send the updated listing
   } catch (err) {
     res.status(500).json({ error: err.message }); // Handle errors
   }
