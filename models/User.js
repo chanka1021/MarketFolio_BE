@@ -2,17 +2,18 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
 
+// Define User schema
 const UserSchema = mongoose.Schema({
-  name: { type: String, required: true }, // String,
+  name: { type: String, required: true },
   email: { type: String, unique: true, required: true },
-  password: { type: String, required: true }, // String,
+  password: { type: String, required: true },
   phone: { type: Number, unique: true, required: true },
-  city: { type: String, required: true }, // String,
+  city: { type: String, required: true }
 });
 
-//static method to create User
+// Static method to create a new user
 UserSchema.statics.createUser = async function (userData) {
-  //validation
+  // Validation
   if (!userData.email || !userData.password) {
     throw new Error("All fields are required");
   }
@@ -30,7 +31,8 @@ UserSchema.statics.createUser = async function (userData) {
   const hashedPassword = await bcrypt.hash(userData.password, salt);
   return this.create({ ...userData, password: hashedPassword });
 };
-//static method to login User
+
+// Static method to log in a user
 UserSchema.statics.loginUser = async function (userData) {
   if (!userData.email || !userData.password) {
     throw new Error("All fields must be filled");
@@ -45,7 +47,8 @@ UserSchema.statics.loginUser = async function (userData) {
   }
   return user;
 };
-// method to update User
+
+// Method to update user
 UserSchema.statics.updateUser = async function(userId, userData) {
   // Validation
   if (!userId) {
