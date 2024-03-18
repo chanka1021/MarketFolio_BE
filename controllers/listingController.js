@@ -20,7 +20,6 @@ const s3 = new S3Client({
   },
   region: BUCKET_REGION
 });
-
 // Multer storage configuration
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage }).array('photos', 5);
