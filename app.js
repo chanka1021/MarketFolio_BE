@@ -17,7 +17,7 @@ mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true, useUnifiedTo
 
 // Root route
 app.get('/', (req, res) => {
-    res.send('Hello');
+    res.send('Hello what are you looking for 🤨 ? ');
 });
 
 // Import user routes
