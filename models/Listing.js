@@ -38,10 +38,11 @@
       type: Date,
       default: Date.now,
     },
-    status :{
-      type : String,
-      default : "active"
-    }
+    status: {
+      type: String,
+      enum: ["published", "hidden", "sold"],
+      default: "published",
+    },
   });
 
   ListingSchema.statics.createListing = async function (listingData) {

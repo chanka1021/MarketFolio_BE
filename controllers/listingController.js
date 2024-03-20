@@ -265,6 +265,9 @@ const updateListing = async (req, res) => {
   }
 };
 
+// Controller function to toggle  status (active/hidden)
+
+
 // Export controller functions
 module.exports = {
   createListing,
