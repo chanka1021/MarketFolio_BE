@@ -41,7 +41,7 @@
     status: {
       type: String,
       enum: ["published", "hidden", "sold"],
-      default: "published",
+      default: "Published"
     },
   });
 

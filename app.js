@@ -8,6 +8,9 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+    extended: true
+  })); 
 app.use(bodyParser.json());
 
 // Connect to the database

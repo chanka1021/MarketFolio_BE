@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
+const Listing = require("./Listing");
 
 // Define User schema
 const UserSchema = mongoose.Schema({
@@ -8,7 +9,9 @@ const UserSchema = mongoose.Schema({
   email: { type: String, unique: true, required: true },
   password: { type: String, required: true },
   phone: { type: Number, unique: true, required: true },
-  city: { type: String, required: true }
+  city: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+  favoriteListings: [{ type: mongoose.Schema.Types.ObjectId, ref: "Listing"  }]
 });
 
 // Static method to create a new user
@@ -80,6 +83,42 @@ UserSchema.statics.updateUser = async function(userId, userData) {
     throw new Error("Failed to update user data");
   }
   return updatedUser;
+};
+
+//static methoded to add favorite listing
+UserSchema.statics.addFavoriteListings = async function(userId, listingId) {
+  // Validation
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+  const listing = await Listing.findById(listingId);
+  if (!listing) {
+    throw new Error("Listing not found");
+  }
+  // Add favorite listings
+  const user = await this.findByIdAndUpdate(userId, { $addToSet: { favoriteListings: listingId } }, { new: true });
+  if (!user) {
+    throw new Error("Failed to add favorite listings");
+  }
+  return user;
+};
+
+//static methoded to remove favorite listing
+UserSchema.statics.removeFavoriteListings = async function(userId, listingId) {
+  // Validation
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+  const listing = await Listing.findById(listingId);
+  if (!listing) {
+    throw new Error("Listing not found");
+  }
+  // Remove favorite listing
+  const user = await this.findByIdAndUpdate(userId, { $pull: { favoriteListings: listingId } }, { new: true });
+  if (!user) {
+    throw new Error("Failed to remove favorite listings");
+  }
+  return user;
 };
 
 module.exports = mongoose.model("User", UserSchema);

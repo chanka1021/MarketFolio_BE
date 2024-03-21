@@ -57,9 +57,48 @@ const updateUser = async (req, res) => {
   try {
     const user = await User.updateUser(req.params.id, req.body); // Update user
     if (!user) {
+      return res.status(404).json({ error: 'No user found with this ID' }); // If user not found,
+    }
+    res.status(200).json("done"); // Send updated user details
+  } catch (err) {
+    res.status(400).json({ error: err.message }); // Handle errors
+  }
+}
+
+// Controller function to add faVORITES LISTINGS to user
+const addFavoriteListings = async (req, res) => {
+  // Validation
+  if (!req.body.listingId) {
+    return res.status(400).json({ error: "Listing ID is required" });
+  }
+  try {
+    console.log( req.body.userId, req.body.listingId)
+
+    const user = await User.addFavoriteListings(req.body.userId, req.body.listingId); // Add favorite listings
+    if (!user) {
       return res.status(404).json({ error: 'No user found with this ID' }); // If user not found, return 404
     }
-    res.status(200).json(user); // Send updated user details
+    res.status(200).json("DONE"); // Send updated user details
+  } catch (err) {
+    res.status(400).json({ error: err.message }); // Handle errors
+  }
+}
+
+// Controller function to remove favorite listings from user
+const removeFavoriteListings = async (req, res) => {
+  // Validation
+  if (!req.body.listingId) {
+    return res.status(400).json({ error: "Listing ID is required" });
+  } 
+  if (!req.body.userId) {
+    return res.status(400).json({ error: "User ID is required" });
+  }
+  try {
+    const user = await User.removeFavoriteListings(req.body.userId, req.body.listingId); // Remove favorite listings
+    if (!user) {
+      return res.status(404).json({ error: 'No user found with this ID' }); // If user not found, return 404
+    }
+    res.status(200).json("DONE"); // Send updated user details
   } catch (err) {
     res.status(400).json({ error: err.message }); // Handle errors
   }
@@ -69,5 +108,7 @@ const updateUser = async (req, res) => {
 module.exports = {
   loginUser,
   signupUser,
-  updateUser
+  updateUser,
+  addFavoriteListings,
+  removeFavoriteListings
 };

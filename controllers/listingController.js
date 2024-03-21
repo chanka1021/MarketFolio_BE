@@ -36,6 +36,7 @@ const randomImageName = () => {
 
 // Controller function to create a new listing
 const createListing = async (req, res) => {
+
   try {
     // Handling file uploads using the upload middleware
     upload(req, res, async function (err) {
