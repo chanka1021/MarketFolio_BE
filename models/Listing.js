@@ -40,7 +40,7 @@
     },
     status: {
       type: String,
-      enum: ["published", "hidden", "sold"],
+      enum: ["Published", "Hidden", "Sold"],
       default: "Published"
     },
   });
