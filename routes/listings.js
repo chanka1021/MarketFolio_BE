@@ -4,7 +4,6 @@ const auth = require("../middleware/requireAuth");
 // controller functions
 const { createListing, getAllListings ,getOneListing,getFilteredListing ,getListingByUserId , deleteListing,updateListing} = require("../controllers/listingController");
 
-router.use(auth)
 
 // get all listings route
 router.get("/", getAllListings);
