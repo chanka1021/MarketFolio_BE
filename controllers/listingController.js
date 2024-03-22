@@ -177,6 +177,17 @@ const getFilteredListing = async (req, res) => {
         const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
         photoUrls.push(url);
       }
+      const userInfo = {
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        city: user.city
+      };
+      
+      const listingObject = listing.toObject(); // Convert listing to plain JavaScript object
+      listingObject.userInfo = userInfo; // Add user info to listing object
+      delete listingObject.seller; // Remove seller field from listing object
+      
       listing.photos = photoUrls; // Replace photo names with signed URLs
     }
     res.send(listings); // Send the filtered listings with signed photo URLs
