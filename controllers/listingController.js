@@ -176,6 +176,10 @@ const getFilteredListing = async (req, res) => {
         const command = new GetObjectCommand(getObjParams);
         const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
         photoUrls.push(url);
+      } 
+      const user = await User.findById(listing.seller);
+      if (!user) {
+        return res.status(404).json({ error: "Seller not found" }); // If seller not found, return 404
       }
       const userInfo = {
         name: user.name,
@@ -187,14 +191,31 @@ const getFilteredListing = async (req, res) => {
       const listingObject = listing.toObject(); // Convert listing to plain JavaScript object
       listingObject.userInfo = userInfo; // Add user info to listing object
       delete listingObject.seller; // Remove seller field from listing object
-      
-      listing.photos = photoUrls; // Replace photo names with signed URLs
+
+      listingObject.photos = photoUrls; // Replace photo names with signed URLs
+      Object.assign(listing, listingObject); // Update the original listing object
     }
-    res.send(listings); // Send the filtered listings with signed photo URLs
+    
+    // Extracting only required fields for the response
+    const responseListings = listings.map(listing => ({
+      _id: listing._id,
+      name: listing.name,
+      category: listing.category,
+      city: listing.city,
+      description: listing.description,
+      price: listing.price,
+      photos: listing.photos,
+      createdAt : listing.createdAt,
+      userInfo: listing.userInfo // Include userInfo
+    }));
+
+    res.send(responseListings); // Send the filtered listings with signed photo URLs and userInfo
   } catch (err) {
     res.status(500).json({ error: err.message }); // Handle errors
   }
 };
+
+
 
 // Controller function to get listings by user ID
 const getListingByUserId = async (req, res) => {
@@ -220,7 +241,6 @@ const getListingByUserId = async (req, res) => {
   }
 };
 
-// Controller function to delete a listing
 // Controller function to delete a listing
 const deleteListing = async (req, res) => {
   try {
@@ -276,9 +296,20 @@ const updateListing = async (req, res) => {
     res.status(500).json({ error: err.message }); // Handle errors
   }
 };
-
-// Controller function to toggle  status (active/hidden)
-
+// get fav listing of user 
+const getFavListings = async (req, res) => {
+  try {
+    console.log("id:",req.params.id)
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const listings = await Listing.find({ _id: { $in: user.favoriteListings } });
+    res.send(listings);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 // Export controller functions
 module.exports = {
@@ -288,5 +319,6 @@ module.exports = {
   getFilteredListing,
   getListingByUserId,
   deleteListing,
-  updateListing
+  updateListing,
+  getFavListings
 };
