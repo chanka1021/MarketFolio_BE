@@ -299,12 +299,22 @@ const updateListing = async (req, res) => {
 // get fav listing of user 
 const getFavListings = async (req, res) => {
   try {
-    console.log("id:",req.params.id)
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
     const listings = await Listing.find({ _id: { $in: user.favoriteListings } });
+    const photoUrls = [];
+      for (const photoName of listing.photos) {
+        const getObjParams = {
+          Bucket: BUCKET_NAME,
+          Key: photoName
+        };
+        const command = new GetObjectCommand(getObjParams);
+        const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+        photoUrls.push(url);
+      }
+      listing.photos = photoUrls; // Replace photo names with signed URLs
     res.send(listings);
   } catch (err) {
     res.status(500).json({ error: err.message });
