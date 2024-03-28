@@ -304,7 +304,8 @@ const getFavListings = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
     const listings = await Listing.find({ _id: { $in: user.favoriteListings } });
-    const photoUrls = [];
+    const photoUrlsPromises = listings.map(async (listing) => {
+      const photoUrls = [];
       for (const photoName of listing.photos) {
         const getObjParams = {
           Bucket: BUCKET_NAME,
@@ -315,7 +316,12 @@ const getFavListings = async (req, res) => {
         photoUrls.push(url);
       }
       listing.photos = photoUrls; // Replace photo names with signed URLs
-    res.send(listings);
+      return listing;
+    });
+
+    const listingsWithSignedUrls = await Promise.all(photoUrlsPromises);
+
+    res.send(listingsWithSignedUrls);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
